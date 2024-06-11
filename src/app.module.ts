@@ -6,6 +6,7 @@ import { UsersModule } from './users/users.module';
 import { ReservarSalaService } from './reservar-sala/reservar-sala.service';
 import { ReservarSalaModule } from './reservar-sala/reservar-sala.module';
 import { Sala } from './reservar-sala/reservar-sala.entity'; // Importe a entidade Sala
+import { User } from './users/user.entity';
 
 
 @Module({
@@ -23,7 +24,7 @@ import { Sala } from './reservar-sala/reservar-sala.entity'; // Importe a entida
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_NAME'),
-        entities: [Sala], 
+        entities: [User, Sala], 
         synchronize: true,
       }),
     }),
