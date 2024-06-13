@@ -15,6 +15,8 @@ const users_module_1 = require("./users/users.module");
 const reservar_sala_module_1 = require("./reservar-sala/reservar-sala.module");
 const reservar_sala_entity_1 = require("./reservar-sala/reservar-sala.entity");
 const user_entity_1 = require("./users/user.entity");
+const upload_controller_1 = require("./upload/upload.controller");
+const upload_module_1 = require("./upload/upload.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -41,7 +43,9 @@ exports.AppModule = AppModule = __decorate([
             auth_module_1.AuthModule,
             users_module_1.UsersModule,
             reservar_sala_module_1.ReservarSalaModule,
+            upload_module_1.UploadModule,
         ],
+        controllers: [upload_controller_1.UploadController, upload_controller_1.UploadController],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map

@@ -7,6 +7,8 @@ import { ReservarSalaService } from './reservar-sala/reservar-sala.service';
 import { ReservarSalaModule } from './reservar-sala/reservar-sala.module';
 import { Sala } from './reservar-sala/reservar-sala.entity'; // Importe a entidade Sala
 import { User } from './users/user.entity';
+import { UploadController } from './upload/upload.controller';
+import { UploadModule } from './upload/upload.module';
 
 
 @Module({
@@ -31,6 +33,8 @@ import { User } from './users/user.entity';
     AuthModule,
     UsersModule,
     ReservarSalaModule,
+    UploadModule,
   ],
+  controllers: [UploadController, UploadController],
 })
 export class AppModule {}

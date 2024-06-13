@@ -11,34 +11,29 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SalaController = void 0;
 const common_1 = require("@nestjs/common");
 const reservar_sala_service_1 = require("./reservar-sala.service");
 const platform_express_1 = require("@nestjs/platform-express");
 const multer_1 = require("multer");
-const multer_2 = __importDefault(require("multer"));
-const storage = multer_2.default.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/');
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + '.jpg');
-    }
-});
-const upload = (0, multer_2.default)({ storage: storage });
+const path_1 = require("path");
 let SalaController = class SalaController {
     constructor(reservarSalaService) {
         this.reservarSalaService = reservarSalaService;
     }
     async reservarSala(formData, roomImage) {
-        const reserva = await this.reservarSalaService.criarSala(formData);
-        return `Sala reservada com sucesso! ID da reserva: ${reserva.id}`;
+        try {
+            if (roomImage) {
+                formData.roomImage = roomImage.filename;
+            }
+            const reserva = await this.reservarSalaService.criarSala(formData);
+            return `Sala reservada com sucesso! ID da reserva: ${reserva.id}`;
+        }
+        catch (error) {
+            console.error('Erro ao reservar sala:', error);
+            throw new Error('Erro ao reservar a sala. Tente novamente mais tarde.');
+        }
     }
     async criarSala(formData) {
         return this.reservarSalaService.criarSala(formData);
@@ -72,11 +67,23 @@ let SalaController = class SalaController {
 exports.SalaController = SalaController;
 __decorate([
     (0, common_1.Post)('reservar'),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('roomImage')),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('roomImage', {
+        storage: (0, multer_1.diskStorage)({
+            destination: './uploads',
+            filename: (req, file, callback) => {
+                const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+                const ext = (0, path_1.extname)(file.originalname);
+                callback(null, `${uniqueSuffix}${ext}`);
+            }
+        }),
+        limits: {
+            fileSize: 5 * 1024 * 1024,
+        }
+    })),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.UploadedFile)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, typeof (_a = typeof multer_1.Multer !== "undefined" && multer_1.Multer.File) === "function" ? _a : Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], SalaController.prototype, "reservarSala", null);
 __decorate([

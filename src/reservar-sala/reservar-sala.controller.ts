@@ -1,41 +1,46 @@
 import { Controller, Post, Body, Get, Param, Put, Delete, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { ReservarSalaService } from './reservar-sala.service';
 import { Sala } from './reservar-sala.entity';
-
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Multer } from 'multer';
-
-// Importe o tipo correto do Multer
-import multer from 'multer';
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/'); 
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + '.jpg'); 
-  }
-});
-
-const upload = multer({ storage: storage });
-
-
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 
 @Controller('sala')
 export class SalaController {
   constructor(private readonly reservarSalaService: ReservarSalaService) {}
 
   @Post('reservar')
-  @UseInterceptors(FileInterceptor('roomImage')) // Use o interceptor do NestJS para processar o arquivo
-  async reservarSala(@Body() formData: any, @UploadedFile() roomImage: Multer.File): Promise<string> {
-    // Aqui, você pode acessar o arquivo usando a variável 'roomImage'
-    // Por exemplo, você pode salvar o arquivo em algum local ou fazer outras operações com ele
-    // ...
-    const reserva = await this.reservarSalaService.criarSala(formData);
-    return `Sala reservada com sucesso! ID da reserva: ${reserva.id}`;
+  @UseInterceptors(FileInterceptor('roomImage', {
+    storage: diskStorage({
+      destination: './uploads', // Pasta onde a imagem será salva
+      filename: (req, file, callback) => {
+        // Define o nome do arquivo como um timestamp + extensão original
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const ext = extname(file.originalname);
+        callback(null, `${uniqueSuffix}${ext}`);
+      }
+    }),
+    limits: {
+      fileSize: 5 * 1024 * 1024, // Limita o tamanho do arquivo a 5MB
+    }
+  }))
+  async reservarSala(
+    @Body() formData: any,
+    @UploadedFile() roomImage: Express.Multer.File
+  ): Promise<string> {
+    try {
+      if (roomImage) {
+        formData.roomImage = roomImage.filename; // Atribuir o nome do arquivo à propriedade roomImage
+      }
+
+      const reserva = await this.reservarSalaService.criarSala(formData);
+      return `Sala reservada com sucesso! ID da reserva: ${reserva.id}`;
+    } catch (error) {
+      console.error('Erro ao reservar sala:', error);
+      throw new Error('Erro ao reservar a sala. Tente novamente mais tarde.');
+    }
   }
-  
+
   @Post('criar')  
   async criarSala(@Body() formData: any): Promise<Sala> {
     return this.reservarSalaService.criarSala(formData);
